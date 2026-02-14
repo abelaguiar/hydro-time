@@ -34,12 +34,12 @@ export const HistoryList: React.FC<HistoryListProps> = ({ logs, locale, labels }
   }
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-20">
       {Object.keys(groupedLogs).map(dateKey => {
         const dayTotal = groupedLogs[dateKey].reduce((sum, log) => sum + log.amountMl, 0);
         
         return (
-          <div key={dateKey} className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700">
+          <div key={dateKey} className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700 h-fit">
             <div className="flex justify-between items-center mb-4 border-b border-slate-100 dark:border-slate-700 pb-2">
               <h3 className="font-semibold text-slate-700 dark:text-slate-200">{dateKey}</h3>
               <span className="text-sm font-medium text-hydro-600 dark:text-hydro-400">{labels.total}: {dayTotal}ml</span>

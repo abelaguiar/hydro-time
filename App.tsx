@@ -94,69 +94,79 @@ function App() {
 
   // Render Functions
   const renderDashboard = () => (
-    <div className="animate-fade-in space-y-6">
-      <div className="bg-gradient-to-br from-white to-hydro-50 dark:from-slate-800 dark:to-slate-900 rounded-3xl p-6 shadow-sm border border-hydro-100 dark:border-slate-700 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-hydro-200/20 dark:bg-hydro-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
-        <h2 className="text-xl font-bold text-center text-slate-700 dark:text-slate-200 mb-2 relative z-10">{t.dailyProgress}</h2>
-        <ProgressBar current={getTodayTotal()} goal={settings.dailyGoalMl} />
-      </div>
-
-      <Timer 
-        onFinish={handleTimerFinish} 
-        labels={{ title: t.intakeTimer, start: t.startDrinking, finish: t.finishDrinking }}
-      />
-
-      {timerDuration !== null && (
-        <div className="animate-bounce-short bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 rounded-xl text-center mb-4">
-          <p className="text-green-700 dark:text-green-400 font-medium">{t.timerFinished} ({timerDuration}s)</p>
-          <p className="text-sm text-green-600 dark:text-green-500">{t.howMuch}</p>
-        </div>
-      )}
-
-      <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
-        <div className="flex items-center gap-2 mb-4">
-           <div className="w-8 h-8 rounded-full bg-hydro-100 dark:bg-slate-700 flex items-center justify-center text-hydro-500 dark:text-hydro-400">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-           </div>
-           <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200">{t.addWater}</h3>
-        </div>
+    <div className="animate-fade-in pb-24">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        <div className="flex gap-2 mb-6">
-          <input
-            type="number"
-            value={manualInput}
-            onChange={(e) => setManualInput(e.target.value)}
-            placeholder={t.amountPlaceholder}
-            className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-hydro-500 dark:text-white transition-shadow"
-          />
-          <button
-            onClick={handleManualAdd}
-            disabled={!manualInput}
-            className="bg-slate-800 dark:bg-slate-700 disabled:opacity-50 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-bold px-6 py-3 rounded-2xl transition-all shadow-lg shadow-slate-200 dark:shadow-none"
-          >
-            {t.add}
-          </button>
+        {/* Left Column (Tablet): Progress */}
+        <div className="flex flex-col">
+          <div className="bg-gradient-to-br from-white to-hydro-50 dark:from-slate-800 dark:to-slate-900 rounded-3xl p-6 shadow-sm border border-hydro-100 dark:border-slate-700 relative overflow-hidden flex-1 flex flex-col justify-center">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-hydro-200/20 dark:bg-hydro-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+            <h2 className="text-xl font-bold text-center text-slate-700 dark:text-slate-200 mb-2 relative z-10">{t.dailyProgress}</h2>
+            <ProgressBar current={getTodayTotal()} goal={settings.dailyGoalMl} />
+          </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-3">
-          {QUICK_ADD_AMOUNTS.map(amount => (
-            <button
-              key={amount}
-              onClick={() => addLog(amount, timerDuration || 0)}
-              className="group flex flex-col items-center justify-center p-3 bg-hydro-50 dark:bg-slate-700/50 hover:bg-hydro-100 dark:hover:bg-slate-700 border border-transparent hover:border-hydro-200 dark:hover:border-slate-600 rounded-2xl transition-all active:scale-95"
-            >
-              <div className="text-hydro-500 dark:text-hydro-400 mb-1 opacity-80 group-hover:opacity-100 transition-opacity">
-                <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                   <path d="M12 22C17.5228 22 22 17.5228 22 12C22 8.463 19.123 4.293 12 0C4.877 4.293 2 8.463 2 12C2 17.5228 6.47715 22 12 22Z" />
-                </svg>
+        {/* Right Column (Tablet): Actions */}
+        <div className="flex flex-col gap-6">
+          <Timer 
+            onFinish={handleTimerFinish} 
+            labels={{ title: t.intakeTimer, start: t.startDrinking, finish: t.finishDrinking }}
+          />
+
+          {timerDuration !== null && (
+            <div className="animate-bounce-short bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 rounded-xl text-center">
+              <p className="text-green-700 dark:text-green-400 font-medium">{t.timerFinished} ({timerDuration}s)</p>
+              <p className="text-sm text-green-600 dark:text-green-500">{t.howMuch}</p>
+            </div>
+          )}
+
+          <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-full bg-hydro-100 dark:bg-slate-700 flex items-center justify-center text-hydro-500 dark:text-hydro-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
               </div>
-              <span className="text-hydro-900 dark:text-hydro-100 font-bold text-sm">
-                {amount}
-              </span>
-            </button>
-          ))}
+              <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200">{t.addWater}</h3>
+            </div>
+            
+            {/* Fixed responsive layout for input and button */}
+            <div className="flex flex-col sm:flex-row gap-2 mb-6">
+              <input
+                type="number"
+                value={manualInput}
+                onChange={(e) => setManualInput(e.target.value)}
+                placeholder={t.amountPlaceholder}
+                className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-hydro-500 dark:text-white transition-shadow"
+              />
+              <button
+                onClick={handleManualAdd}
+                disabled={!manualInput}
+                className="bg-slate-800 dark:bg-slate-700 disabled:opacity-50 hover:bg-slate-900 dark:hover:bg-slate-600 text-white font-bold px-6 py-3 rounded-2xl transition-all shadow-lg shadow-slate-200 dark:shadow-none w-full sm:w-auto"
+              >
+                {t.add}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-4 gap-3">
+              {QUICK_ADD_AMOUNTS.map(amount => (
+                <button
+                  key={amount}
+                  onClick={() => addLog(amount, timerDuration || 0)}
+                  className="group flex flex-col items-center justify-center p-3 bg-hydro-50 dark:bg-slate-700/50 hover:bg-hydro-100 dark:hover:bg-slate-700 border border-transparent hover:border-hydro-200 dark:hover:border-slate-600 rounded-2xl transition-all active:scale-95"
+                >
+                  <div className="text-hydro-500 dark:text-hydro-400 mb-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 8.463 19.123 4.293 12 0C4.877 4.293 2 8.463 2 12C2 17.5228 6.47715 22 12 22Z" />
+                    </svg>
+                  </div>
+                  <span className="text-hydro-900 dark:text-hydro-100 font-bold text-sm">
+                    {amount}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -180,27 +190,35 @@ function App() {
   );
 
   const renderStats = () => (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in pb-24">
       <h2 className="text-2xl font-black text-slate-800 dark:text-white mb-6">{t.statistics}</h2>
-      <WeeklyChart 
-        logs={logs} 
-        locale={settings.language} 
-        labels={{ title: t.last7Days }}
-      />
-      <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900 rounded-3xl border border-blue-100 dark:border-slate-700 shadow-sm">
-         <h3 className="font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-wide text-xs">{t.totalAllTime}</h3>
-         <p className="text-4xl font-black text-hydro-600 dark:text-hydro-400 mt-2">
-            {(logs.reduce((acc, curr) => acc + curr.amountMl, 0) / 1000).toFixed(1)} <span className="text-xl">L</span>
-         </p>
+      
+      <div className="flex flex-col md:grid md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+           <WeeklyChart 
+             logs={logs} 
+             locale={settings.language} 
+             labels={{ title: t.last7Days }}
+           />
+        </div>
+        
+        <div className="md:col-span-1 h-full">
+          <div className="h-full p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-900 rounded-3xl border border-blue-100 dark:border-slate-700 shadow-sm flex flex-col justify-center">
+             <h3 className="font-semibold text-slate-700 dark:text-slate-200 uppercase tracking-wide text-xs">{t.totalAllTime}</h3>
+             <p className="text-4xl font-black text-hydro-600 dark:text-hydro-400 mt-2">
+                {(logs.reduce((acc, curr) => acc + curr.amountMl, 0) / 1000).toFixed(1)} <span className="text-xl">L</span>
+             </p>
+          </div>
+        </div>
       </div>
     </div>
   );
 
   const renderSettings = () => (
-    <div className="animate-fade-in space-y-6">
+    <div className="animate-fade-in space-y-6 pb-24">
       <h2 className="text-2xl font-black text-slate-800 dark:text-white mb-6">{t.settings}</h2>
       
-      <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 space-y-6">
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 space-y-6 max-w-2xl mx-auto md:mx-0">
         
         {/* Language Selector */}
         <div>
@@ -275,8 +293,8 @@ function App() {
   );
 
   return (
-    <div className="min-h-screen pb-24 bg-slate-50 dark:bg-slate-950 transition-colors duration-300 selection:bg-hydro-200">
-      <div className="max-w-md mx-auto min-h-screen bg-slate-50 dark:bg-slate-950 shadow-2xl relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 selection:bg-hydro-200">
+      <div className="w-full md:max-w-4xl lg:max-w-5xl mx-auto min-h-screen bg-slate-50 dark:bg-slate-950 shadow-2xl relative overflow-hidden md:border-x md:border-slate-200 dark:md:border-slate-800">
         
         {/* Header */}
         <header className="px-6 py-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-20 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
@@ -294,8 +312,8 @@ function App() {
           {view === AppView.SETTINGS && renderSettings()}
         </main>
 
-        {/* Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 px-6 py-3 flex justify-between items-center z-50 safe-pb">
+        {/* Bottom Navigation - Adapts to 'dock' style on tablet */}
+        <nav className="fixed bottom-0 left-0 right-0 w-full md:max-w-md mx-auto bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 px-6 py-3 flex justify-between items-center z-50 safe-pb md:bottom-6 md:rounded-2xl md:border md:shadow-2xl transition-all duration-300">
           <NavButton 
             active={view === AppView.DASHBOARD} 
             onClick={() => setView(AppView.DASHBOARD)} 
