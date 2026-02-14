@@ -1,0 +1,5 @@
+{
+  "name": "HydroTime",
+  "description": "A comprehensive hydration tracking app with intake timer, history logging, daily goals, and progress visualization.",
+  "requestFramePermissions": []
+}
