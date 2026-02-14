@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { IntakeLog, UserSettings, AppView, Language } from './types';
+import { IntakeLog, UserSettings, AppView, Language, Theme } from './types';
 import { getLogs, saveLogs, getSettings, saveSettings } from './utils/storage';
 import { exportToCSV } from './utils/csv';
 import { QUICK_ADD_AMOUNTS, TRANSLATIONS, DEFAULT_SETTINGS } from './constants';
@@ -26,6 +26,32 @@ function App() {
   useEffect(() => {
     saveSettings(settings);
   }, [settings]);
+
+  // Handle Theme Change
+  useEffect(() => {
+    const root = window.document.documentElement;
+    const applyTheme = () => {
+      const isDark = settings.theme === 'dark' || 
+        (settings.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      
+      if (isDark) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    };
+
+    applyTheme();
+
+    // Listener for system changes if mode is 'system'
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      if (settings.theme === 'system') applyTheme();
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [settings.theme]);
 
   // Helper for translations
   const t = TRANSLATIONS[settings.language] || TRANSLATIONS['pt-BR'];
@@ -85,14 +111,6 @@ function App() {
     }
   };
 
-  const toggleLanguage = () => {
-    setSettings(prev => ({
-      ...prev,
-      language: prev.language === 'en-US' ? 'pt-BR' : 'en-US'
-    }));
-  };
-
-  // Render Functions
   const renderDashboard = () => (
     <div className="animate-fade-in pb-24">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -237,6 +255,33 @@ function App() {
                className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all ${settings.language === 'en-US' ? 'bg-white dark:bg-slate-700 text-hydro-600 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'}`}
              >
                English
+             </button>
+          </div>
+        </div>
+
+        {/* Theme Selector */}
+        <div>
+          <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
+            {t.theme}
+          </label>
+          <div className="flex bg-slate-100 dark:bg-slate-900 rounded-xl p-1">
+             <button 
+               onClick={() => setSettings({...settings, theme: 'light'})}
+               className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all ${settings.theme === 'light' ? 'bg-white dark:bg-slate-700 text-hydro-600 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'}`}
+             >
+               {t.themeLight}
+             </button>
+             <button 
+               onClick={() => setSettings({...settings, theme: 'dark'})}
+               className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all ${settings.theme === 'dark' ? 'bg-white dark:bg-slate-700 text-hydro-600 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'}`}
+             >
+               {t.themeDark}
+             </button>
+             <button 
+               onClick={() => setSettings({...settings, theme: 'system'})}
+               className={`flex-1 py-3 rounded-lg text-sm font-bold transition-all ${settings.theme === 'system' ? 'bg-white dark:bg-slate-700 text-hydro-600 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'}`}
+             >
+               {t.themeSystem}
              </button>
           </div>
         </div>

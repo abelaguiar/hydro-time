@@ -7,6 +7,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   reminderIntervalMinutes: 60,
   notificationsEnabled: false,
   language: 'pt-BR',
+  theme: 'system',
 };
 
 export const STORAGE_KEYS = {
@@ -39,6 +40,10 @@ export const TRANSLATIONS = {
     reminderInterval: 'Interval (minutes)',
     exportCsv: 'Export History to CSV',
     language: 'Language',
+    theme: 'Theme',
+    themeLight: 'Light',
+    themeDark: 'Dark',
+    themeSystem: 'System',
     navHome: 'Home',
     navStats: 'Stats',
     navHistory: 'History',
@@ -69,6 +74,10 @@ export const TRANSLATIONS = {
     reminderInterval: 'Intervalo (minutos)',
     exportCsv: 'Exportar Histórico (CSV)',
     language: 'Idioma',
+    theme: 'Tema',
+    themeLight: 'Claro',
+    themeDark: 'Escuro',
+    themeSystem: 'Sistema',
     navHome: 'Início',
     navStats: 'Estatísticas',
     navHistory: 'Histórico',
