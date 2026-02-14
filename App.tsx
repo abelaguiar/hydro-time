@@ -4,7 +4,6 @@ import { getLogs, saveLogs, getSettings, saveSettings } from './utils/storage';
 import { exportToCSV } from './utils/csv';
 import { QUICK_ADD_AMOUNTS, TRANSLATIONS, DEFAULT_SETTINGS } from './constants';
 import { ProgressBar } from './components/ProgressBar';
-import { Timer } from './components/Timer';
 import { HistoryList } from './components/HistoryList';
 import { WeeklyChart } from './components/WeeklyChart';
 
@@ -13,8 +12,7 @@ function App() {
   const [logs, setLogs] = useState<IntakeLog[]>([]);
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [manualInput, setManualInput] = useState<string>('');
-  const [timerDuration, setTimerDuration] = useState<number | null>(null);
-
+  
   // Load data on mount
   useEffect(() => {
     setLogs(getLogs());
@@ -86,7 +84,6 @@ function App() {
     const updatedLogs = [newLog, ...logs];
     setLogs(updatedLogs);
     saveLogs(updatedLogs);
-    setTimerDuration(null); 
     
     if(view !== AppView.DASHBOARD) setView(AppView.DASHBOARD);
 
@@ -99,44 +96,98 @@ function App() {
       .reduce((sum, log) => sum + log.amountMl, 0);
   };
 
-  const handleTimerFinish = (duration: number) => {
-    setTimerDuration(duration);
+  // Helper calculations for new counters
+  const getWeeklyTotal = () => {
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    return logs
+      .filter(log => log.timestamp >= oneWeekAgo.getTime())
+      .reduce((sum, log) => sum + log.amountMl, 0);
+  };
+
+  const getMonthlyTotal = () => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    return logs
+      .filter(log => {
+        const date = new Date(log.timestamp);
+        return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+      })
+      .reduce((sum, log) => sum + log.amountMl, 0);
+  };
+
+  const getMonthlyStatus = () => {
+    const monthlyTotal = getMonthlyTotal();
+    const dayOfMonth = new Date().getDate();
+    // Theoretical target: Daily Goal * Days Passed so far
+    const expected = dayOfMonth * settings.dailyGoalMl;
+    return monthlyTotal >= expected;
   };
 
   const handleManualAdd = () => {
     const amount = parseInt(manualInput);
     if (!isNaN(amount) && amount > 0) {
-      addLog(amount, timerDuration || 0);
+      addLog(amount, 0);
       setManualInput('');
     }
   };
 
-  const renderDashboard = () => (
+  const renderDashboard = () => {
+    const todayTotal = getTodayTotal();
+    const isDailyGoalMet = todayTotal >= settings.dailyGoalMl;
+    const isMonthOnTrack = getMonthlyStatus();
+
+    return (
     <div className="animate-fade-in pb-24">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        {/* Left Column (Tablet): Progress */}
+        {/* Left Column: Progress */}
         <div className="flex flex-col">
-          <div className="bg-gradient-to-br from-white to-hydro-50 dark:from-slate-800 dark:to-slate-900 rounded-3xl p-6 shadow-sm border border-hydro-100 dark:border-slate-700 relative overflow-hidden flex-1 flex flex-col justify-center">
+          <div className={`bg-gradient-to-br ${isDailyGoalMet ? 'from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border-green-200 dark:border-green-800' : 'from-white to-hydro-50 dark:from-slate-800 dark:to-slate-900 border-hydro-100 dark:border-slate-700'} transition-all duration-500 rounded-3xl p-6 shadow-sm border relative overflow-hidden flex-1 flex flex-col justify-center`}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-hydro-200/20 dark:bg-hydro-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
             <h2 className="text-xl font-bold text-center text-slate-700 dark:text-slate-200 mb-2 relative z-10">{t.dailyProgress}</h2>
-            <ProgressBar current={getTodayTotal()} goal={settings.dailyGoalMl} />
+            <ProgressBar current={todayTotal} goal={settings.dailyGoalMl} />
+            
+            {/* Daily Goal Success Indicator */}
+            {isDailyGoalMet && (
+              <div className="mt-4 flex items-center justify-center gap-2 bg-green-100 dark:bg-green-800/50 text-green-700 dark:text-green-300 py-2 px-4 rounded-xl animate-bounce-short">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="font-bold text-sm">{t.dailyGoalMet}</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Right Column (Tablet): Actions */}
+        {/* Right Column: Overview & Actions */}
         <div className="flex flex-col gap-6">
-          <Timer 
-            onFinish={handleTimerFinish} 
-            labels={{ title: t.intakeTimer, start: t.startDrinking, finish: t.finishDrinking }}
-          />
+          
+          {/* New Stats Overview Cards */}
+          <div className="grid grid-cols-2 gap-4">
+             {/* Weekly Card */}
+             <div className="bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t.weeklyTotal}</span>
+                <div className="mt-2">
+                   <span className="text-2xl font-black text-slate-700 dark:text-white">{(getWeeklyTotal() / 1000).toFixed(1)}</span>
+                   <span className="text-sm font-medium text-slate-400 ml-1">L</span>
+                </div>
+             </div>
 
-          {timerDuration !== null && (
-            <div className="animate-bounce-short bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 rounded-xl text-center">
-              <p className="text-green-700 dark:text-green-400 font-medium">{t.timerFinished} ({timerDuration}s)</p>
-              <p className="text-sm text-green-600 dark:text-green-500">{t.howMuch}</p>
-            </div>
-          )}
+             {/* Monthly Card with Status */}
+             <div className="bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between relative overflow-hidden">
+                <div className={`absolute right-2 top-2 w-3 h-3 rounded-full ${isMonthOnTrack ? 'bg-green-500' : 'bg-orange-400'}`}></div>
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t.monthlyTotal}</span>
+                <div className="mt-2">
+                   <span className="text-2xl font-black text-slate-700 dark:text-white">{(getMonthlyTotal() / 1000).toFixed(1)}</span>
+                   <span className="text-sm font-medium text-slate-400 ml-1">L</span>
+                </div>
+                <span className={`text-[10px] font-bold mt-1 ${isMonthOnTrack ? 'text-green-500' : 'text-orange-400'}`}>
+                  {isMonthOnTrack ? t.onTrack : t.behindSchedule}
+                </span>
+             </div>
+          </div>
 
           <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-4">
@@ -155,7 +206,7 @@ function App() {
                 value={manualInput}
                 onChange={(e) => setManualInput(e.target.value)}
                 placeholder={t.amountPlaceholder}
-                className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-hydro-500 dark:text-white transition-shadow"
+                className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-hydro-500 text-slate-900 dark:text-white transition-shadow"
               />
               <button
                 onClick={handleManualAdd}
@@ -170,7 +221,7 @@ function App() {
               {QUICK_ADD_AMOUNTS.map(amount => (
                 <button
                   key={amount}
-                  onClick={() => addLog(amount, timerDuration || 0)}
+                  onClick={() => addLog(amount, 0)}
                   className="group flex flex-col items-center justify-center p-3 bg-hydro-50 dark:bg-slate-700/50 hover:bg-hydro-100 dark:hover:bg-slate-700 border border-transparent hover:border-hydro-200 dark:hover:border-slate-600 rounded-2xl transition-all active:scale-95"
                 >
                   <div className="text-hydro-500 dark:text-hydro-400 mb-1 opacity-80 group-hover:opacity-100 transition-opacity">
@@ -188,7 +239,7 @@ function App() {
         </div>
       </div>
     </div>
-  );
+  )};
 
   const renderHistory = () => (
     <div className="animate-fade-in">
@@ -294,7 +345,7 @@ function App() {
             type="number"
             value={settings.dailyGoalMl}
             onChange={(e) => setSettings({ ...settings, dailyGoalMl: Number(e.target.value) })}
-            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-hydro-500 dark:text-white font-bold text-lg"
+            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-hydro-500 text-slate-900 dark:text-white font-bold text-lg"
           />
         </div>
 
@@ -317,7 +368,7 @@ function App() {
               type="number"
               value={settings.reminderIntervalMinutes}
               onChange={(e) => setSettings({ ...settings, reminderIntervalMinutes: Number(e.target.value) })}
-              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-hydro-500 dark:text-white font-bold text-lg"
+              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-hydro-500 text-slate-900 dark:text-white font-bold text-lg"
             />
           </div>
         )}

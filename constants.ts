@@ -18,10 +18,6 @@ export const STORAGE_KEYS = {
 export const TRANSLATIONS = {
   'en-US': {
     dailyProgress: 'Daily Progress',
-    intakeTimer: 'Intake Timer',
-    startDrinking: 'Start Drinking',
-    finishDrinking: 'Finish Drinking',
-    timerFinished: 'Timer finished!',
     howMuch: 'How much did you drink?',
     addWater: 'Add Water',
     amountPlaceholder: 'Amount (ml)',
@@ -48,14 +44,19 @@ export const TRANSLATIONS = {
     navStats: 'Stats',
     navHistory: 'History',
     navSettings: 'Settings',
-    seconds: 's'
+    seconds: 's',
+    // New translations
+    overview: 'Overview',
+    weeklyTotal: 'Last 7 Days',
+    monthlyTotal: 'Current Month',
+    goalMet: 'Goal Met!',
+    keepGoing: 'Keep Going',
+    onTrack: 'On Track',
+    behindSchedule: 'Behind',
+    dailyGoalMet: 'Daily Goal Achieved!'
   },
   'pt-BR': {
     dailyProgress: 'Progresso Diário',
-    intakeTimer: 'Cronômetro',
-    startDrinking: 'Iniciar Ingestão',
-    finishDrinking: 'Finalizar Ingestão',
-    timerFinished: 'Tempo finalizado!',
     howMuch: 'Quanto você bebeu?',
     addWater: 'Adicionar Água',
     amountPlaceholder: 'Quantidade (ml)',
@@ -82,6 +83,15 @@ export const TRANSLATIONS = {
     navStats: 'Estatísticas',
     navHistory: 'Histórico',
     navSettings: 'Ajustes',
-    seconds: 's'
+    seconds: 's',
+    // New translations
+    overview: 'Resumo',
+    weeklyTotal: 'Últimos 7 dias',
+    monthlyTotal: 'Mês Atual',
+    goalMet: 'Meta Batida!',
+    keepGoing: 'Continue assim',
+    onTrack: 'No Ritmo',
+    behindSchedule: 'Atrasado',
+    dailyGoalMet: 'Meta Diária Concluída!'
   }
 };
