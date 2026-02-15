@@ -1,3 +1,4 @@
+
 import { UserSettings } from './types';
 
 export const QUICK_ADD_AMOUNTS = [100, 200, 300, 500];
@@ -53,7 +54,9 @@ export const TRANSLATIONS = {
     keepGoing: 'Keep Going',
     onTrack: 'On Track',
     behindSchedule: 'Behind',
-    dailyGoalMet: 'Daily Goal Achieved!'
+    dailyGoalMet: 'Daily Goal Achieved!',
+    // Fix: Added missing startDrinking key
+    startDrinking: 'Time to hydrate! Drink some water.'
   },
   'pt-BR': {
     dailyProgress: 'Progresso Diário',
@@ -92,6 +95,8 @@ export const TRANSLATIONS = {
     keepGoing: 'Continue assim',
     onTrack: 'No Ritmo',
     behindSchedule: 'Atrasado',
-    dailyGoalMet: 'Meta Diária Concluída!'
+    dailyGoalMet: 'Meta Diária Concluída!',
+    // Fix: Added missing startDrinking key
+    startDrinking: 'Hora de se hidratar! Beba um pouco de água.'
   }
 };
