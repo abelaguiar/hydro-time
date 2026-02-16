@@ -45,6 +45,10 @@ function App() {
                 durationSeconds: log.durationSeconds || 0,
               }));
               
+              console.log('Logs carregados da API:', intakeResponse.intakeLogs.length);
+              console.log('Primeiro log:', transformedLogs[0]);
+              console.log('Data do primeiro log:', transformedLogs[0] ? new Date(transformedLogs[0].timestamp).toLocaleString('pt-BR') : 'N/A');
+              
               setLogs(transformedLogs);
               
               // Update settings
@@ -176,9 +180,15 @@ function App() {
 
   const getTodayTotal = () => {
     const today = new Date().toLocaleDateString(settings.language);
-    return logs
-      .filter(log => new Date(log.timestamp).toLocaleDateString(settings.language) === today)
-      .reduce((sum, log) => sum + log.amountMl, 0);
+    const todayLogs = logs.filter(log => new Date(log.timestamp).toLocaleDateString(settings.language) === today);
+    const total = todayLogs.reduce((sum, log) => sum + log.amountMl, 0);
+    
+    console.log('Data de hoje formatada:', today);
+    console.log('Total de logs:', logs.length);
+    console.log('Logs de hoje:', todayLogs.length);
+    console.log('Total de ml hoje:', total);
+    
+    return total;
   };
 
   // Helper calculations for new counters

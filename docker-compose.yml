@@ -4,7 +4,17 @@ services:
     container_name: hydrotime-app
     ports:
       - "3000:3000"
+    environment:
+      VITE_API_URL: "http://localhost:5000"
     volumes:
       - .:/app
       - /app/node_modules
     restart: unless-stopped
+    networks:
+      - hydro-network-dev
+
+networks:
+  hydro-network-dev:
+    driver: bridge
+    external: true
+
