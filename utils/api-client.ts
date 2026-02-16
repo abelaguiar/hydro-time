@@ -10,7 +10,9 @@ import {
   IntakeLogPayload
 } from '../types';
 
-const API_URL = (import.meta as any).env.VITE_API_URL || 'https://api-hydro-time-mckv.vercel.app';
+const API_URL = (import.meta as any).env.MODE === 'production' 
+  ? ((import.meta as any).env.VITE_API_URL_PROD || 'https://api-hydro-time-mckv.vercel.app')
+  : ((import.meta as any).env.VITE_API_URL || 'http://localhost:5000');
 
 class ApiClient {
   private token: string | null = null;
