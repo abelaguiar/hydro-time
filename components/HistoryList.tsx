@@ -8,8 +8,6 @@ interface HistoryListProps {
     noRecords: string;
     startTracking: string;
     total: string;
-    duration: string;
-    seconds: string;
   };
 }
 
@@ -47,16 +45,9 @@ export const HistoryList: React.FC<HistoryListProps> = ({ logs, locale, labels }
             <div className="space-y-3">
               {groupedLogs[dateKey].map(log => (
                 <div key={log.id} className="flex justify-between items-center text-sm">
-                  <div className="flex flex-col">
-                    <span className="text-slate-800 dark:text-slate-300 font-medium">
-                      {new Date(log.timestamp).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                    {log.durationSeconds > 0 && (
-                      <span className="text-xs text-slate-500 dark:text-slate-500">
-                        {labels.duration}: {log.durationSeconds}{labels.seconds}
-                      </span>
-                    )}
-                  </div>
+                  <span className="text-slate-800 dark:text-slate-300 font-medium">
+                    {new Date(log.timestamp).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })}
+                  </span>
                   <span className="text-hydro-600 dark:text-hydro-400 font-bold bg-hydro-50 dark:bg-slate-700 px-3 py-1 rounded-full">
                     {log.amountMl} ml
                   </span>

@@ -150,12 +150,11 @@ function App() {
     return () => clearInterval(interval);
   }, [settings.notificationsEnabled, settings.reminderIntervalMinutes, t]);
 
-  const addLog = useCallback((amount: number, duration: number = 0) => {
+  const addLog = useCallback((amount: number) => {
     const newLog: IntakeLog = {
       id: Date.now().toString(),
       timestamp: Date.now(),
-      amountMl: amount,
-      durationSeconds: duration
+      amountMl: amount
     };
     const updatedLogs = [newLog, ...logs];
     setLogs(updatedLogs);
@@ -164,8 +163,7 @@ function App() {
     if (user) {
       apiClient.addIntake({
         amountMl: amount,
-        timestamp: newLog.timestamp,
-        durationSeconds: duration
+        timestamp: newLog.timestamp
       }).catch(err => {
         console.error('Error syncing intake to API:', err);
         setSyncError('Erro ao sincronizar');
@@ -243,7 +241,6 @@ function App() {
         id: log.id,
         timestamp: typeof log.timestamp === 'string' ? parseInt(log.timestamp, 10) : log.timestamp,
         amountMl: log.amountMl,
-        durationSeconds: log.durationSeconds || 0,
       }));
       
       setLogs(transformedLogs);
@@ -415,9 +412,7 @@ function App() {
         labels={{
           noRecords: t.noRecords,
           startTracking: t.startTracking,
-          total: t.total,
-          duration: t.duration,
-          seconds: t.seconds
+          total: t.total
         }}
       />
     </div>

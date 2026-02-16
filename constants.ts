@@ -27,7 +27,6 @@ export const TRANSLATIONS = {
     noRecords: 'No records found.',
     startTracking: 'Start tracking your hydration!',
     total: 'Total',
-    duration: 'Duration',
     statistics: 'Statistics',
     last7Days: 'Last 7 Days',
     totalAllTime: 'Total All Time',
@@ -45,7 +44,6 @@ export const TRANSLATIONS = {
     navStats: 'Stats',
     navHistory: 'History',
     navSettings: 'Settings',
-    seconds: 's',
     // New translations
     overview: 'Overview',
     weeklyTotal: 'Last 7 Days',
@@ -68,7 +66,6 @@ export const TRANSLATIONS = {
     noRecords: 'Nenhum registro encontrado.',
     startTracking: 'Comece a monitorar sua hidratação!',
     total: 'Total',
-    duration: 'Duração',
     statistics: 'Estatísticas',
     last7Days: 'Últimos 7 Dias',
     totalAllTime: 'Total Acumulado',

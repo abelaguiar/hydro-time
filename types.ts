@@ -2,7 +2,6 @@ export interface IntakeLog {
   id: string;
   timestamp: number; // Unix timestamp
   amountMl: number;
-  durationSeconds: number;
 }
 
 export type Language = 'en-US' | 'pt-BR';
@@ -48,7 +47,6 @@ export interface RegisterPayload {
 export interface IntakeLogPayload {
   amountMl: number;
   timestamp: number;
-  durationSeconds?: number;
 }
 
 export interface IntakeLogsResponse {

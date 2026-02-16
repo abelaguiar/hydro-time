@@ -1,14 +1,13 @@
 import { IntakeLog } from '../types';
 
 export const exportToCSV = (logs: IntakeLog[]) => {
-  const headers = ['Date', 'Time', 'Amount (ml)', 'Duration (sec)'];
+  const headers = ['Date', 'Time', 'Amount (ml)'];
   const rows = logs.map(log => {
     const date = new Date(log.timestamp);
     return [
       date.toLocaleDateString(),
       date.toLocaleTimeString(),
-      log.amountMl,
-      log.durationSeconds
+      log.amountMl
     ];
   });
 
