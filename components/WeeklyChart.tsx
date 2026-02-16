@@ -18,9 +18,21 @@ export const WeeklyChart: React.FC<WeeklyChartProps> = ({ logs, locale, labels }
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
-      const dateStr = d.toLocaleDateString(locale);
-      const dayLogs = logs.filter(l => new Date(l.timestamp).toLocaleDateString(locale) === dateStr);
+      
+      // Set day boundaries for comparison
+      const dayStart = new Date(d);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(d);
+      dayEnd.setHours(23, 59, 59, 999);
+      
+      // Filter logs within this day
+      const dayLogs = logs.filter(l => {
+        const logDate = new Date(l.timestamp);
+        return logDate >= dayStart && logDate < dayEnd;
+      });
+      
       const total = dayLogs.reduce((sum, l) => sum + l.amountMl, 0);
+      const dateStr = d.toLocaleDateString(locale);
       
       last7Days.push({
         name: d.toLocaleDateString(locale, { weekday: 'short' }),
