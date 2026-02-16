@@ -6,9 +6,11 @@ interface ProgressBarProps {
 }
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({ current, goal }) => {
-  const percentage = Math.min(100, Math.max(0, (current / goal) * 100));
-  const radius = 80;
-  const stroke = 12;
+  // Ensure goal is valid to avoid NaN
+  const validGoal = goal && goal > 0 ? goal : 2500;
+  const percentage = Math.min(100, Math.max(0, (current / validGoal) * 100));
+  const radius = 130;
+  const stroke = 14;
   const normalizedRadius = radius - stroke * 2;
   const circumference = normalizedRadius * 2 * Math.PI;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
@@ -49,12 +51,12 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ current, goal }) => {
             className=""
           />
         </svg>
-        <div className="absolute flex flex-col items-center">
-          <span className="text-4xl font-bold text-slate-800 dark:text-white">
-            {Math.round(percentage)}%
+        <div className="absolute flex flex-col items-center gap-1">
+          <span className="text-5xl font-bold text-slate-800 dark:text-white">
+            {isNaN(percentage) ? 0 : Math.round(percentage)}%
           </span>
-          <span className="text-sm text-slate-500 dark:text-slate-400">
-            {current} / {goal} ml
+          <span className="text-base font-medium text-slate-600 dark:text-slate-300">
+            {current} / {validGoal} ml
           </span>
         </div>
       </div>

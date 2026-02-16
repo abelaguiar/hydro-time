@@ -6,24 +6,96 @@ import { QUICK_ADD_AMOUNTS, TRANSLATIONS, DEFAULT_SETTINGS } from './constants';
 import { ProgressBar } from './components/ProgressBar';
 import { HistoryList } from './components/HistoryList';
 import { WeeklyChart } from './components/WeeklyChart';
+import { Login } from './components/Login';
+import { apiClient } from './utils/api-client';
+import { authService, AuthUser } from './utils/auth';
 
 function App() {
   const [view, setView] = useState<AppView>(AppView.DASHBOARD);
   const [logs, setLogs] = useState<IntakeLog[]>([]);
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [manualInput, setManualInput] = useState<string>('');
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [syncError, setSyncError] = useState<string | null>(null);
   
-  // Load data on mount
+  // Check authentication and load data on mount
   useEffect(() => {
-    setLogs(getLogs());
-    const savedSettings = getSettings();
-    setSettings(savedSettings);
+    const initializeApp = async () => {
+      setIsLoading(true);
+      try {
+        // Check if user is already logged in
+        if (authService.isAuthenticated()) {
+          const storedUser = authService.getStoredUser();
+          if (storedUser) {
+            setUser(storedUser);
+            
+            // Load data from API
+            try {
+              const [intakeResponse, settingsResponse] = await Promise.all([
+                apiClient.getIntakeLogs(1000, 0),
+                apiClient.getSettings(),
+              ]);
+              
+              // Transform API intake logs to local format
+              const transformedLogs: IntakeLog[] = intakeResponse.intakeLogs.map(log => ({
+                id: log.id,
+                timestamp: typeof log.timestamp === 'string' ? parseInt(log.timestamp, 10) : log.timestamp,
+                amountMl: log.amountMl,
+                durationSeconds: log.durationSeconds || 0,
+              }));
+              
+              setLogs(transformedLogs);
+              
+              // Update settings
+              const apiSettings: UserSettings = {
+                dailyGoalMl: settingsResponse.settings.dailyGoalMl,
+                reminderIntervalMinutes: settingsResponse.settings.reminderIntervalMinutes,
+                notificationsEnabled: settingsResponse.settings.notificationsEnabled,
+                language: settingsResponse.settings.language as Language,
+                theme: settingsResponse.settings.theme as Theme,
+              };
+              setSettings(apiSettings);
+              setSyncError(null);
+            } catch (error) {
+              console.error('Error loading from API, using local storage:', error);
+              // Fallback to local storage
+              setLogs(getLogs());
+              const savedSettings = getSettings();
+              setSettings(savedSettings);
+              setSyncError('Usando dados locais');
+            }
+          }
+        } else {
+          // No authentication, use local data
+          setLogs(getLogs());
+          const savedSettings = getSettings();
+          setSettings(savedSettings);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeApp();
   }, []);
 
-  // Save settings when changed
+  // Save settings when changed - sync with API if authenticated
   useEffect(() => {
-    saveSettings(settings);
-  }, [settings]);
+    if (user) {
+      apiClient.updateSettings({
+        dailyGoalMl: settings.dailyGoalMl,
+        reminderIntervalMinutes: settings.reminderIntervalMinutes,
+        notificationsEnabled: settings.notificationsEnabled,
+        language: settings.language,
+        theme: settings.theme,
+      }).catch(err => {
+        console.error('Error syncing settings to API:', err);
+      });
+    } else {
+      saveSettings(settings);
+    }
+  }, [settings, user]);
 
   // Handle Theme Change
   useEffect(() => {
@@ -83,11 +155,24 @@ function App() {
     };
     const updatedLogs = [newLog, ...logs];
     setLogs(updatedLogs);
-    saveLogs(updatedLogs);
+    
+    // Sync with API if authenticated
+    if (user) {
+      apiClient.addIntake({
+        amountMl: amount,
+        timestamp: newLog.timestamp,
+        durationSeconds: duration
+      }).catch(err => {
+        console.error('Error syncing intake to API:', err);
+        setSyncError('Erro ao sincronizar');
+      });
+    } else {
+      saveLogs(updatedLogs);
+    }
     
     if(view !== AppView.DASHBOARD) setView(AppView.DASHBOARD);
 
-  }, [logs, view]);
+  }, [logs, view, user]);
 
   const getTodayTotal = () => {
     const today = new Date().toLocaleDateString(settings.language);
@@ -131,6 +216,47 @@ function App() {
       addLog(amount, 0);
       setManualInput('');
     }
+  };
+
+  const handleLoginSuccess = async (loggedInUser: AuthUser) => {
+    setUser(loggedInUser);
+    authService.storeUser(loggedInUser);
+    
+    // Reload data from API
+    try {
+      const [intakeResponse, settingsResponse] = await Promise.all([
+        apiClient.getIntakeLogs(1000, 0),
+        apiClient.getSettings(),
+      ]);
+      
+      const transformedLogs: IntakeLog[] = intakeResponse.intakeLogs.map(log => ({
+        id: log.id,
+        timestamp: log.timestamp,
+        amountMl: log.amountMl,
+        durationSeconds: log.durationSeconds || 0,
+      }));
+      
+      setLogs(transformedLogs);
+      
+      const apiSettings: UserSettings = {
+        dailyGoalMl: settingsResponse.settings.dailyGoalMl,
+        reminderIntervalMinutes: settingsResponse.settings.reminderIntervalMinutes,
+        notificationsEnabled: settingsResponse.settings.notificationsEnabled,
+        language: settingsResponse.settings.language as Language,
+        theme: settingsResponse.settings.theme as Theme,
+      };
+      setSettings(apiSettings);
+    } catch (error) {
+      console.error('Error loading data after login:', error);
+    }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    authService.logout();
+    apiClient.clearToken();
+    setLogs([]);
+    setSettings(DEFAULT_SETTINGS);
   };
 
   const renderDashboard = () => {
@@ -373,7 +499,7 @@ function App() {
           </div>
         )}
 
-        <div className="pt-4 border-t border-slate-100 dark:border-slate-700">
+        <div className="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-3">
            <button
              onClick={() => exportToCSV(logs)}
              className="w-full py-4 px-4 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex items-center justify-center gap-2"
@@ -383,10 +509,41 @@ function App() {
              </svg>
              {t.exportCsv}
            </button>
+           
+           {user && (
+             <button
+               onClick={handleLogout}
+               className="w-full py-4 px-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-bold rounded-2xl hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors flex items-center justify-center gap-2"
+             >
+               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+               </svg>
+               Sair
+             </button>
+           )}
         </div>
       </div>
     </div>
   );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-hydro-500 to-hydro-300 flex items-center justify-center text-white shadow-lg shadow-hydro-500/30 mx-auto mb-4 animate-pulse">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 8.463 19.123 4.293 12 0C4.877 4.293 2 8.463 2 12C2 17.5228 6.47715 22 12 22Z" />
+            </svg>
+          </div>
+          <p className="text-slate-600 dark:text-slate-400">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 selection:bg-hydro-200">
