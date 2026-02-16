@@ -39,7 +39,14 @@ export function Login({ onLoginSuccess }: LoginProps) {
   return (
     <div className="login-container">
       <div className="login-box">
-        <h1>HydroTime</h1>
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-500 to-blue-300 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 8.463 19.123 4.293 12 0C4.877 4.293 2 8.463 2 12C2 17.5228 6.47715 22 12 22Z" />
+            </svg>
+          </div>
+          <h1>HydroTime</h1>
+        </div>
         <p className="subtitle">Controle sua hidratação diária</p>
 
         <form onSubmit={handleSubmit} className="login-form">
