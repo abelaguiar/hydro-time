@@ -283,7 +283,20 @@ function App() {
           <div className={`bg-gradient-to-br ${isDailyGoalMet ? 'from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border-green-200 dark:border-green-800' : 'from-white to-hydro-50 dark:from-slate-800 dark:to-slate-900 border-hydro-100 dark:border-slate-700'} transition-all duration-500 rounded-3xl p-6 shadow-sm border relative overflow-hidden flex-1 flex flex-col justify-center`}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-hydro-200/20 dark:bg-hydro-500/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
             <h2 className="text-xl font-bold text-center text-slate-700 dark:text-slate-200 mb-2 relative z-10">{t.dailyProgress}</h2>
-            <ProgressBar current={todayTotal} goal={settings.dailyGoalMl} />
+            
+            {todayTotal === 0 ? (
+              <div className="flex flex-col items-center justify-center my-8 text-center">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-hydro-200 to-hydro-100 dark:from-hydro-900/30 dark:to-hydro-800/30 flex items-center justify-center mb-4">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12 text-hydro-500 dark:text-hydro-400">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 8.463 19.123 4.293 12 0C4.877 4.293 2 8.463 2 12C2 17.5228 6.47715 22 12 22Z" />
+                  </svg>
+                </div>
+                <p className="text-2xl font-bold text-slate-700 dark:text-slate-200 mb-2">{t.startDrinking}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Meta: {settings.dailyGoalMl} ml</p>
+              </div>
+            ) : (
+              <ProgressBar current={todayTotal} goal={settings.dailyGoalMl} />
+            )}
             
             {/* Daily Goal Success Indicator */}
             {isDailyGoalMet && (
@@ -305,23 +318,38 @@ function App() {
              {/* Weekly Card */}
              <div className="bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t.weeklyTotal}</span>
-                <div className="mt-2">
-                   <span className="text-2xl font-black text-slate-700 dark:text-white">{(getWeeklyTotal() / 1000).toFixed(1)}</span>
-                   <span className="text-sm font-medium text-slate-400 ml-1">L</span>
-                </div>
+                {getWeeklyTotal() === 0 ? (
+                  <div className="mt-3 flex flex-col justify-center">
+                    <div className="text-3xl font-black text-slate-400 dark:text-slate-500">—</div>
+                  </div>
+                ) : (
+                  <div className="mt-2">
+                    <span className="text-2xl font-black text-slate-700 dark:text-white">{(getWeeklyTotal() / 1000).toFixed(1)}</span>
+                    <span className="text-sm font-medium text-slate-400 ml-1">L</span>
+                  </div>
+                )}
              </div>
 
              {/* Monthly Card with Status */}
              <div className="bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between relative overflow-hidden">
                 <div className={`absolute right-2 top-2 w-3 h-3 rounded-full ${isMonthOnTrack ? 'bg-green-500' : 'bg-orange-400'}`}></div>
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t.monthlyTotal}</span>
-                <div className="mt-2">
-                   <span className="text-2xl font-black text-slate-700 dark:text-white">{(getMonthlyTotal() / 1000).toFixed(1)}</span>
-                   <span className="text-sm font-medium text-slate-400 ml-1">L</span>
-                </div>
-                <span className={`text-[10px] font-bold mt-1 ${isMonthOnTrack ? 'text-green-500' : 'text-orange-400'}`}>
-                  {isMonthOnTrack ? t.onTrack : t.behindSchedule}
-                </span>
+                {getMonthlyTotal() === 0 ? (
+                  <div className="mt-3 flex flex-col justify-center">
+                    <div className="text-3xl font-black text-slate-400 dark:text-slate-500">—</div>
+                    <span className="text-[10px] font-bold mt-2 text-slate-400 dark:text-slate-500">
+                      {t.startDrinking}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="mt-2">
+                    <span className="text-2xl font-black text-slate-700 dark:text-white">{(getMonthlyTotal() / 1000).toFixed(1)}</span>
+                    <span className="text-sm font-medium text-slate-400 ml-1">L</span>
+                    <span className={`text-[10px] font-bold mt-1 block ${isMonthOnTrack ? 'text-green-500' : 'text-orange-400'}`}>
+                      {isMonthOnTrack ? t.onTrack : t.behindSchedule}
+                    </span>
+                  </div>
+                )}
              </div>
           </div>
 
