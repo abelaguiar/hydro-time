@@ -241,7 +241,7 @@ function App() {
       
       const transformedLogs: IntakeLog[] = intakeResponse.intakeLogs.map(log => ({
         id: log.id,
-        timestamp: log.timestamp,
+        timestamp: typeof log.timestamp === 'string' ? parseInt(log.timestamp, 10) : log.timestamp,
         amountMl: log.amountMl,
         durationSeconds: log.durationSeconds || 0,
       }));
@@ -256,6 +256,7 @@ function App() {
         theme: settingsResponse.settings.theme as Theme,
       };
       setSettings(apiSettings);
+      setView(AppView.DASHBOARD); // Return to dashboard after login
     } catch (error) {
       console.error('Error loading data after login:', error);
     }
